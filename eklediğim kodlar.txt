@@ -1,0 +1,395 @@
+--Kullanıcılar 
+CREATE TABLE Kullanici (
+    kullanici_id SERIAL PRIMARY KEY,
+    kullanici_adi VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    sifre VARCHAR(255) NOT NULL,
+    favori_oyunlar TEXT
+);
+-- Oyunlar 
+CREATE TABLE Oyunlar (
+    oyun_id SERIAL PRIMARY KEY,
+    oyun_adi VARCHAR(100) NOT NULL UNIQUE
+);
+
+--  Takımlar 
+CREATE TABLE Takimlar (
+    takim_id SERIAL PRIMARY KEY,
+    takim_adi VARCHAR(100) NOT NULL,
+    uyeler TEXT,
+    kaptan VARCHAR(100)
+); 
+--  Turnuvalar 
+CREATE TABLE Turnuvalar (
+    turnuva_id SERIAL PRIMARY KEY,
+    turnuva_adi VARCHAR(100) NOT NULL,
+    turu VARCHAR(50),
+    tarih DATE,
+    aciklama TEXT
+);
+
+--  Turnuva Katılım
+CREATE TABLE TurnuvaKatilim (
+    katilim_id SERIAL PRIMARY KEY,
+    kullanici_id INT NOT NULL,
+    turnuva_id INT NOT NULL,
+    takim_id INT,
+    bireysel BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (kullanici_id) REFERENCES Kullanici(kullanici_id),
+    FOREIGN KEY (turnuva_id) REFERENCES Turnuvalar(turnuva_id),
+    FOREIGN KEY (takim_id) REFERENCES Takimlar(takim_id)
+);
+
+--  Turnuva Ödülleri
+CREATE TABLE TurnuvaOdulleri (
+    odul_id SERIAL PRIMARY KEY,
+    turnuva_id INT NOT NULL,
+    odul_miktari INT NOT NULL,
+    odul_turu VARCHAR(100),
+    FOREIGN KEY (turnuva_id) REFERENCES Turnuvalar(turnuva_id)
+);
+
+-- Turnuva Sonuçları 
+CREATE TABLE TurnuvaSonuclari (
+    turnuva_sonuc_id SERIAL PRIMARY KEY,
+    turnuva_id INT NOT NULL,
+    takim_id INT,
+    skor INT,
+    derece INT,
+    FOREIGN KEY (turnuva_id) REFERENCES Turnuvalar(turnuva_id),
+    FOREIGN KEY (takim_id) REFERENCES Takimlar(takim_id)
+);
+
+-- Maçlar 
+CREATE TABLE Maclar (
+    mac_id SERIAL PRIMARY KEY,
+    takim1_id INT NOT NULL,
+    takim2_id INT NOT NULL,
+    tarih DATE,
+    saat TIME,
+    harita VARCHAR(100),
+    turnuva_id INT,
+    FOREIGN KEY (takim1_id) REFERENCES Takimlar(takim_id),
+    FOREIGN KEY (takim2_id) REFERENCES Takimlar(takim_id),
+    FOREIGN KEY (turnuva_id) REFERENCES Turnuvalar(turnuva_id)
+);
+
+--  İstatistikler 
+CREATE TABLE Istatistikler (
+    istatistik_id SERIAL PRIMARY KEY,
+    mac_id INT NOT NULL,
+    takim_id INT NOT NULL,
+    skor INT,
+    kazanan BOOLEAN,
+    FOREIGN KEY (mac_id) REFERENCES Maclar(mac_id),
+    FOREIGN KEY (takim_id) REFERENCES Takimlar(takim_id)
+);
+
+-- İstatistik Log 
+CREATE TABLE IstatistikLog (
+    log_id SERIAL PRIMARY KEY,
+    mac_id INT,
+    takim_id INT,
+    islem_zamani TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE IstatistikLog
+ALTER COLUMN mac_id DROP NOT NULL;
+
+
+-- Log Fonksiyonu
+CREATE OR REPLACE FUNCTION IstatistikEkleLog()
+RETURNS TRIGGER AS $$ 
+BEGIN 
+    INSERT INTO IstatistikLog (mac_id, takim_id) 
+    VALUES (NEW.mac_id, NEW.takim_id); 
+    RETURN NEW; 
+END; 
+$$ LANGUAGE plpgsql;
+
+-- Trigger
+CREATE TRIGGER IstatistikEklendigindeLogla
+AFTER INSERT ON Istatistikler
+FOR EACH ROW
+EXECUTE FUNCTION IstatistikEkleLog();
+
+
+
+
+
+-- Kullanıcılar
+INSERT INTO Kullanici (kullanici_adi, email, sifre, favori_oyunlar) VALUES
+('Ali', 'ali@example.com', 'hashed_password_1', 'Valorant, League of Legends'),
+('Mert', 'mert@example.com', 'hashed_password_2', 'CS:GO, PUBG'),
+('janet46', 'lisa85@cardenas.org', 'hashed_password_0', 'League of Legends'),
+('mwilkins', 'katie14@taylor-patterson.net', 'hashed_password_1', 'PUBG'),
+('brooke77', 'mfox@garcia.com', 'hashed_password_2', 'Dota 2'),
+('rjohns', 'donna49@gmail.com', 'hashed_password_3', 'League of Legends'),
+('alexandermichael', 'stacy98@henderson.org', 'hashed_password_4', 'CS:GO'),
+('hectorgonzalez', 'amandasmith@baxter.net', 'hashed_password_5', 'Dota 2'),
+('abrown', 'abrown@gmail.com', 'hashed_password_6', 'Valorant'),
+('emilyj', 'emilyj@outlook.com', 'hashed_password_7', 'PUBG');
+
+-- Oyunlar
+INSERT INTO Oyunlar (oyun_adi) VALUES
+('Valorant'),
+('League of Legends'),
+('Dota 2'),
+('CS:GO'),
+('PUBG'),
+('Overwatch'),
+('Apex Legends'),
+('Rocket League'),
+('Rainbow Six Siege'),
+('Fortnite');
+
+-- Takımlar
+INSERT INTO Takimlar (takim_adi, uyeler, kaptan) VALUES
+('Şimşekler', 'Ali, Mert', 'Ali'),
+('Kartallar', 'Mert, Janet', 'Mert'),
+('Zaferler', 'Ahmet, Zeynep, Hasan', 'Ahmet'),
+('Galaksiler', 'Mehmet, Elif, Selim', 'Mehmet'),
+('Yıldızlar', 'Brooke, Lisa, Amanda', 'Lisa'),
+('Fırtına', 'John, Emily, Hector', 'Emily'),
+('Karanlıklar', 'Alex, Katie, Donna', 'Katie'),
+('Aslanlar', 'Sam, Leo, Max', 'Sam'),
+('Ejderhalar', 'Sophie, Emma, Mia', 'Emma'),
+('Volkanlar', 'Jack, Ryan, Noah', 'Jack');
+
+-- Turnuvalar
+INSERT INTO Turnuvalar (turnuva_adi, turu, tarih, aciklama) VALUES
+('Yaz Kupası', 'Online', '2025-08-01', 'Yaz turnuvası'),
+('Kış Kupası', 'LAN', '2025-12-15', 'Kış temalı turnuva'),
+('Bahar Şampiyonası', 'Online', '2025-04-20', 'Bahar dönemi karşılaşmaları'),
+('Sonbahar Meydan Okuması', 'LAN', '2025-10-10', 'Sonbahar turnuvası'),
+('Pro League', 'Online', '2025-09-05', 'Profesyonel takımların mücadelesi'),
+('Amatör Turnuva', 'Online', '2025-06-10', 'Yeni başlayanlar için'),
+('Gençler Ligi', 'Online', '2025-07-01', 'Genç oyuncular turnuvası'),
+('Kadınlar Ligi', 'LAN', '2025-05-30', 'Kadın oyunculara özel'),
+('1v1 Challenge', 'Online', '2025-11-11', 'Birebir mücadele'),
+('Takım Turnuvası', 'LAN', '2025-03-03', 'En iyi takım ödülü');
+
+-- Turnuva Ödülleri
+INSERT INTO TurnuvaOdulleri (turnuva_id, odul_miktari, odul_turu) VALUES
+(1, 1000, 'Para Ödülü'),
+(2, 800, 'Ekipman'),
+(3, 500, 'Ekipman'),
+(4, 300, 'Para Ödülü'),
+(5, 1200, 'Sponsorluk'),
+(6, 200, 'Teşekkür Belgesi'),
+(7, 400, 'Ödül Çeki'),
+(8, 600, 'Kupa'),
+(9, 250, 'Madalya'),
+(10, 700, 'Eşya Seti');
+
+-- Maçlar
+INSERT INTO Maclar (takim1_id, takim2_id, tarih, saat, harita, turnuva_id) VALUES
+(1, 2, '2025-08-01', '15:00', 'Harita A', 1),
+(2, 3, '2025-08-02', '16:00', 'Harita B', 1),
+(3, 4, '2025-08-03', '17:00', 'Harita C', 1),
+(4, 5, '2025-08-04', '18:00', 'Harita D', 1),
+(5, 6, '2025-08-05', '19:00', 'Harita E', 1),
+(6, 7, '2025-08-06', '20:00', 'Harita F', 1),
+(7, 8, '2025-08-07', '21:00', 'Harita G', 1),
+(8, 9, '2025-08-08', '22:00', 'Harita H', 1),
+(9, 10, '2025-08-09', '23:00', 'Harita I', 1),
+(10, 1, '2025-08-10', '14:00', 'Harita J', 1);
+
+-- İstatistikler
+INSERT INTO Istatistikler (mac_id, takim_id, skor, kazanan) VALUES
+(1, 1, 10, TRUE),
+(1, 2, 8, FALSE),
+(2, 2, 12, TRUE),
+(2, 3, 7, FALSE),
+(3, 3, 9, TRUE),
+(3, 4, 6, FALSE),
+(4, 4, 11, TRUE),
+(4, 5, 8, FALSE),
+(5, 5, 13, TRUE),
+(5, 6, 7, FALSE),
+(6, 6, 14, TRUE),
+(6, 7, 10, FALSE),
+(7, 7, 12, TRUE),
+(7, 8, 9, FALSE),
+(8, 8, 11, TRUE),
+(8, 9, 8, FALSE),
+(9, 9, 15, TRUE),
+(9, 10, 12, FALSE),
+(10, 10, 14, TRUE),
+(10, 1, 13, FALSE);
+-- Turnuva Katılım Kayıtları
+INSERT INTO TurnuvaKatilim (kullanici_id, turnuva_id, takim_id, bireysel) VALUES
+(1, 1, 1, FALSE),
+(2, 2, 2, FALSE),
+(3, 3, 3, FALSE),
+(4, 4, 4, FALSE),
+(5, 5, 5, FALSE),
+(6, 6, 6, FALSE),
+(7, 7, 7, FALSE),
+(8, 8, 8, FALSE),
+(9, 9, 9, FALSE),
+(10, 10, 10, FALSE);
+-- Turnuva Sonuçları Kayıtları
+INSERT INTO TurnuvaSonuclari (turnuva_id, takim_id, skor, derece) VALUES
+(1, 1, 10, 1),
+(1, 2, 8, 2),
+(2, 2, 12, 1),
+(2, 3, 7, 2),
+(3, 3, 9, 1),
+(3, 4, 6, 2),
+(4, 4, 11, 1),
+(4, 5, 8, 2),
+(5, 5, 13, 1),
+(5, 6, 7, 2);
+-- Takım Eklenince log
+-- İstatistik Güncellenince log
+CREATE OR REPLACE FUNCTION IstatistikUpdateLog()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO IstatistikLog (mac_id, takim_id)
+    VALUES (NEW.mac_id, NEW.takim_id);
+    RAISE NOTICE 'İstatistik güncellendi: Maç ID % Takım ID %', NEW.mac_id, NEW.takim_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER IstatistikUpdateTrigger
+AFTER UPDATE ON Istatistikler
+FOR EACH ROW
+EXECUTE FUNCTION IstatistikUpdateLog();
+
+-- Fonksiyonlar
+
+-- Turnuva Adına Göre Arama
+CREATE OR REPLACE FUNCTION TurnuvaAra(turnuva_adi_param VARCHAR)
+RETURNS TABLE(turnuva_adi VARCHAR, tarih DATE) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT turnuva_adi, tarih 
+    FROM Turnuvalar
+    WHERE turnuva_adi LIKE '%' || turnuva_adi_param || '%';
+END;
+$$ LANGUAGE plpgsql;
+
+-- Kullanıcı Puanına Göre Arama
+CREATE OR REPLACE FUNCTION KullaniciPuanAra(min_puan INT)
+RETURNS TABLE(kullanici_adi VARCHAR, favorite_oyunlar TEXT) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT k.kullanici_adi, k.favorite_oyunlar
+    FROM Kullanici k
+    JOIN TurnuvaKatilim tk ON k.kullanici_id = tk.kullanici_id
+    JOIN TurnuvaSonuclari ts ON tk.turnuva_id = ts.turnuva_id
+    WHERE ts.skor > min_puan;
+END;
+$$ LANGUAGE plpgsql;
+
+--  Kullanıcı Turnuva Ödülleri
+CREATE OR REPLACE FUNCTION KullaniciTurnuvaOdul(kullanici_id_param INT)
+RETURNS TABLE(turnuva_adi VARCHAR, odul_miktari INT, odul_turu VARCHAR) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT t.turnuva_adi, tod.odul_miktari, tod.odul_turu
+    FROM TurnuvaKatilim tk
+    JOIN TurnuvaSonuclari ts ON tk.turnuva_id = ts.turnuva_id
+    JOIN TurnuvaOdulleri tod ON ts.turnuva_id = tod.turnuva_id
+    JOIN Turnuva t ON ts.turnuva_id = t.turnuva_id
+    WHERE tk.kullanici_id = kullanici_id_param;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+-- Turnuva Sonuçları ve Ödülleri Görüntüleme
+CREATE VIEW TurnuvaSonucOdul AS
+SELECT 
+    t.turnuva_adi, 
+    ts.derece, 
+    ts.skor, 
+    tod.odul_miktari, 
+    tod.odul_turu
+FROM 
+    Turnuvalar t
+JOIN TurnuvaSonuclari ts ON t.turnuva_id = ts.turnuva_id
+JOIN TurnuvaOdulleri tod ON t.turnuva_id = tod.turnuva_id;
+
+-- Toplam Skoru 50'yi Geçen Turnuvaları Listeleme
+SELECT turnuva_id, SUM(skor) AS toplam_skor
+FROM TurnuvaSonuclari
+GROUP BY turnuva_id
+HAVING SUM(skor) > 50; 
+-- RECORD örneği
+CREATE OR REPLACE FUNCTION kullanici_bilgi_goster() 
+RETURNS VOID AS $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN SELECT * FROM Kullanici LOOP
+      RAISE NOTICE 'Kullanici Adi: %, Email: %', r.kullanici_adi, r.email;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- CURSOR örneği
+CREATE OR REPLACE FUNCTION kullanici_cursor() 
+RETURNS VOID AS $$
+DECLARE
+  cur CURSOR FOR SELECT * FROM Kullanici;
+  r RECORD;
+BEGIN
+  OPEN cur;
+  LOOP
+      FETCH cur INTO r;
+      EXIT WHEN NOT FOUND;
+      RAISE NOTICE 'Kullanici Adi: %, Email: %', r.kullanici_adi, r.email;
+  END LOOP;
+  CLOSE cur;
+END;
+$$ LANGUAGE plpgsql;
+--istatisliklog fonk
+CREATE OR REPLACE FUNCTION TakimEkleLog() 
+RETURNS TRIGGER AS $$ 
+BEGIN 
+    INSERT INTO IstatistikLog (mac_id, takim_id)
+    VALUES (NEW.mac_id, NEW.takim_id);
+    RETURN NEW; 
+END; 
+$$ LANGUAGE plpgsql;
+--trigger takımeklelog
+CREATE TRIGGER takim_ekle_log_trigger
+AFTER INSERT ON Takimlar
+FOR EACH ROW
+EXECUTE FUNCTION TakimEkleLog();
+
+SELECT * FROM Oyunlar ORDER BY oyun_id;
+
+
+
+
+
+
+-- Hatalı Trigger'ı Kaldır
+DROP TRIGGER IF EXISTS takim_ekle_log_trigger ON Takimlar;
+
+-- Hatalı Fonksiyonu Kaldır
+DROP FUNCTION IF EXISTS TakimEkleLog();
+
+-- Yeni ve Hatasız Fonksiyon
+CREATE OR REPLACE FUNCTION TakimEkleLog()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Takım ekleme işlemini loglamak için basit bir kayıt ekleniyor
+    INSERT INTO IstatistikLog (takim_id, islem_zamani)
+    VALUES (NEW.takim_id, CURRENT_TIMESTAMP);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Yeni ve Hatasız Trigger
+CREATE TRIGGER takim_ekle_log_trigger
+AFTER INSERT ON Takimlar
+FOR EACH ROW
+EXECUTE FUNCTION TakimEkleLog();
+
+SELECT kullanici_adi, sifre
+FROM Kullanici;

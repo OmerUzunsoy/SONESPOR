@@ -1,0 +1,60 @@
+EsportsApp Uygulaması Raporu
+
+Giriş
+Bu raporda, EsportsApp uygulamasının geliştirilme süreci, kullanılan teknolojiler, veritabanı yapısı ve fonksiyonları hakkında bilgi verilecektir. EsportsApp, elektronik spor turnuvalarını takip etmek, takımlar oluşturmak, oyuncu ve maç istatistiklerini kayıt altına almak için geliştirilmiştir.
+
+Uygulamanın Amacı
+EsportsApp, kullanıcıların favori oyunları ve takımlarını yönetmelerine, turnuvalara katılmalarına ve maç sonuçlarını analiz etmelerine olanak tanır. Ayrıca, turnuva ödüllerini ve takım performanslarını takip ederek rekabetçi oyun dünyasında daha iyi bir deneyim sunmayı amaçlamaktadır.
+
+Kullanılan Teknolojiler
+
+.NET (C#) Programlama Dili
+
+ASP.NET MVC Framework
+
+Microsoft SQL Server Veritabanı
+
+Entity Framework (EF)
+
+Visual Studio 2022
+
+Veritabanı Tasarımı
+Veritabanı tasarımında kullanıcılar, oyunlar, takımlar, turnuvalar, maçlar ve istatistikler gibi temel tablolar oluşturulmuştur. Bu tablolar arasındaki ilişkiler, verilerin daha etkin yönetilmesi için dikkatlice planlanmıştır.
+
+Tablolar:
+
+Kullanici: Kullanıcı bilgileri ve favori oyunlarını saklar.
+
+Oyunlar: Platformda yer alan oyunları listeler.
+
+Takimlar: Takım bilgilerini ve üyelerini içerir.
+
+Turnuvalar: Turnuva isimleri, tarihleri ve türleri gibi bilgileri barındırır.
+
+Maclar: Maç tarihleri, saatleri ve harita bilgilerini tutar.
+
+Istatistikler: Maç sonuçlarını ve takım performanslarını kaydeder.
+
+IstatistikLog: Maç ve takım değişikliklerini kayıt altına alır.
+
+SQL Kullanımı
+Uygulamanın veritabanı işlemleri için SQL komutları kullanılmıştır. Örneğin, oyuncu ekleme, takım oluşturma, turnuva sonuçları ve ödüllerini listeleme gibi işlemler SQL sorguları ile gerçekleştirilmiştir. Örnek SQL komutları şunlardır:
+
+CREATE TABLE Kullanici (
+kullanici_id SERIAL PRIMARY KEY,
+kullanici_adi VARCHAR(100) NOT NULL UNIQUE,
+email VARCHAR(100) NOT NULL UNIQUE,
+sifre VARCHAR(255) NOT NULL,
+favori_oyunlar TEXT
+);
+
+INSERT INTO Kullanici (kullanici_adi, email, sifre, favori_oyunlar) VALUES
+('Ali', 'ali@example.com', 'hashed_password_1', 'Valorant, League of Legends');
+
+Sonuç
+EsportsApp, espor topluluğu için kullanıcı dostu bir platform oluşturmayı hedeflemiştir. Uygulama, kullanıcıların turnuvaları takip etmeleri, takımlarını yönetmeleri ve istatistiklerini analiz etmeleri için güçlü bir altyapıya sahiptir. Bu proje, yazılım geliştirme ve veritabanı yönetimi konusunda önemli bir deneyim kazandırmıştır.
+
+
+
+Hazırlayan: Ömer Uzunsoy 24BİLP0057 Tarih: 2025
+
