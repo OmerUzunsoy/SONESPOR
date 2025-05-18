@@ -1,0 +1,6 @@
+1. Pg adminden yeni bir database açıyoruz ismini 'sonespor' yapıyoruz.
+2. İçine 'eklediğim kodlar' txt dosyasının içindeki metinleri yapıştırıp atıyoruz 
+3. EsportsApp dosyasının içindeki EsportsApp.sln dosyasını açıyoruz 
+4.projenin içinden sağ kısımdan DatabaseHelper.cs ismindeki dosyaya çift tıklıyoruz 
+5. içinde "Host=localhost;Port=5432;Username=postgres;Password=3455;Database=sonespor" yazıyı bulup sadece password kısmında ki 3455 i kendi pgadmin şifrenizi yapıyorsunzu 
+6. uygulamayı başlatabilirisniz
